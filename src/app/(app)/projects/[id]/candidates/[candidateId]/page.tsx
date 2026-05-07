@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProteinViewer } from "@/components/visualizations/protein-viewer";
 import { Progress } from "@/components/ui/progress";
+import { CommentThread } from "@/components/feedback/comment-thread";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type {
   EnzymeCandidate,
   Mutation,
   Prediction,
+  Comment,
+  Profile,
 } from "@/lib/types/database";
 
 interface PageProps {
@@ -31,7 +36,14 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function CandidatePage({ params }: PageProps) {
   const { id, candidateId } = await params;
   const supabase = await createClient();
-  const [{ data: candidate }, { data: predictions }] = await Promise.all([
+  const [
+    { data: candidate },
+    { data: predictions },
+    { data: comments },
+    {
+      data: { user },
+    },
+  ] = await Promise.all([
     supabase
       .from("enzyme_candidates")
       .select("*")
@@ -42,8 +54,37 @@ export default async function CandidatePage({ params }: PageProps) {
       .select("*")
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("comments")
+      .select("*")
+      .eq("entity_type", "candidate")
+      .eq("entity_id", candidateId)
+      .order("created_at", { ascending: true }),
+    supabase.auth.getUser(),
   ]);
   if (!candidate) notFound();
+  const allComments = (comments ?? []) as Comment[];
+  // Hydrate author names
+  const authorIds = Array.from(new Set(allComments.map((c) => c.user_id)));
+  const profiles =
+    authorIds.length > 0
+      ? (
+          await supabase
+            .from("profiles")
+            .select("id, full_name, email")
+            .in("id", authorIds)
+        ).data
+      : [];
+  const profileById = new Map(((profiles ?? []) as Profile[]).map((p) => [p.id, p]));
+  const commentsHydrated = allComments.map((c) => ({
+    id: c.id,
+    user_id: c.user_id,
+    body: c.body,
+    created_at: c.created_at,
+    author_name: profileById.get(c.user_id)?.full_name ?? null,
+    author_email: profileById.get(c.user_id)?.email ?? null,
+  }));
+  const myProfile = user ? profileById.get(user.id) : null;
 
   const c = candidate as EnzymeCandidate;
   const preds = (predictions ?? []) as Prediction[];
@@ -115,6 +156,12 @@ export default async function CandidatePage({ params }: PageProps) {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="structure">3D Structure</TabsTrigger>
+          <TabsTrigger value="comments">
+            Comments
+            <Badge variant="outline" className="ml-1.5 font-mono text-[10px]">
+              {commentsHydrated.length}
+            </Badge>
+          </TabsTrigger>
           <TabsTrigger value="experiments">Experiments</TabsTrigger>
         </TabsList>
 
@@ -197,15 +244,58 @@ export default async function CandidatePage({ params }: PageProps) {
           </Card>
         </TabsContent>
 
+        <TabsContent value="comments">
+          {user && (
+            <CommentThread
+              entityType="candidate"
+              entityId={c.id}
+              initialComments={commentsHydrated}
+              currentUserId={user.id}
+              currentUserName={myProfile?.full_name ?? user.email ?? "User"}
+            />
+          )}
+        </TabsContent>
+
         <TabsContent value="experiments">
           <Card className="space-y-3 p-5">
             <h2 className="text-sm font-semibold">Experiments</h2>
             <p className="text-muted-foreground text-xs">
-              Experiment logging lands in Phase 6.
+              Log experiments from{" "}
+              <Link
+                href={`/projects/${id}/experiments`}
+                className="text-accent hover:underline"
+              >
+                the project experiments page
+              </Link>
+              .
             </p>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="flex flex-wrap items-center justify-end gap-2 pt-4">
+        <a
+          href={`/api/export?projectId=${id}&candidateIds=${c.id}&format=fasta`}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          <FileDown />
+          FASTA
+        </a>
+        <a
+          href={`/api/export?projectId=${id}&candidateIds=${c.id}&format=json`}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          <FileDown />
+          JSON
+        </a>
+        <a
+          href={`/api/export?projectId=${id}&candidateIds=${c.id}&format=csv`}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          <FileDown />
+          CSV
+        </a>
+      </div>
     </div>
   );
 }
