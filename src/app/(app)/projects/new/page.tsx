@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+import { NewProjectForm } from "./new-project-form";
 
 export const metadata = { title: "New project · EnzymeForge.ai" };
 
@@ -14,15 +14,12 @@ export default function NewProjectPage() {
         </h1>
         <p className="text-muted-foreground text-sm">
           Start by naming the project and noting the substrate, product, and
-          conditions. The discovery workflow takes it from there.
+          conditions. We&apos;ll retrieve relevant enzymes from UniProt, KEGG,
+          and BRENDA in parallel.
         </p>
       </header>
 
-      <Card className="p-6">
-        <p className="text-muted-foreground text-sm">
-          The project creation form is wired up in Phase 2 (data retrieval).
-        </p>
-      </Card>
+      <NewProjectForm />
     </div>
   );
 }
