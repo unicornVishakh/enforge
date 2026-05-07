@@ -20,7 +20,6 @@
  */
 
 import {
-  ESM2_HIDDEN_DIM,
   fillMaskAt,
   getEmbedding,
   type FillMaskCandidate,
@@ -33,8 +32,9 @@ export interface VariantProposal {
   parent_sequence: string;
   sequence: string;
   mutations: Mutation[];
-  /** ESM-2 mean-pooled 320-d embedding for downstream scoring. */
-  embedding: number[];
+  /** ESM-2 mean-pooled 320-d embedding (null when provider doesn't expose
+   *  feature-extraction for ESM-2; see lib/huggingface). */
+  embedding: number[] | null;
   /** Sum of single-mutation MLM scores (proxy for proposal quality). */
   proposal_score: number;
 }
@@ -121,11 +121,10 @@ export async function generateVariants(
     proposal_score: p.score,
   }));
 
+  // Best-effort: try to fetch real embeddings; getEmbedding returns null
+  // when the provider doesn't route ESM-2 → feature-extraction.
   const embeddings = await Promise.all(
-    proposalsWithSeq.map((p) =>
-      getEmbedding(p.sequence)
-        .catch(() => new Array<number>(ESM2_HIDDEN_DIM).fill(0)),
-    ),
+    proposalsWithSeq.map((p) => getEmbedding(p.sequence).catch(() => null)),
   );
 
   return proposalsWithSeq.map((p, i) => ({ ...p, embedding: embeddings[i] }));

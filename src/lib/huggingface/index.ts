@@ -2,10 +2,15 @@
  * Hugging Face Inference client wrapper for ESM-2 protein language model.
  *
  * Model: facebook/esm2_t6_8M_UR50D — 6-layer ESM-2 small (320-dim hidden).
- *   - Embeddings via featureExtraction → token-level [seq_len, 320] floats,
- *     mean-pooled across the sequence dimension to get a single 320-d vector.
  *   - Masked-LM scoring via fillMask → for a sequence containing one
  *     `<mask>` token, returns top-K amino-acid candidates with their scores.
+ *     This is the real, working signal — verified live (3-5s per probe).
+ *   - Embeddings via featureExtraction: ESM-2 / ProtBERT models are NOT
+ *     currently exposed by HF Inference Providers for feature-extraction
+ *     (only fill-mask is supported). `getEmbedding` returns null in that
+ *     case; the prediction layer treats null embeddings as "skip the
+ *     similarity term" and leans on MLM scores instead. If you self-host
+ *     ESM-2 in the future, swap in the real call.
  *
  * If HUGGINGFACE_API_KEY is missing or the API errors, we throw a typed
  * HFUnavailableError; the caller decides whether to fall back to a heuristic.
@@ -68,31 +73,47 @@ async function withRetry<T>(
 }
 
 /**
- * Mean-pooled 320-dim embedding for a protein sequence.
+ * Mean-pooled 320-dim embedding for a protein sequence. Returns `null` if
+ * the configured provider doesn't expose ESM-2 for feature-extraction
+ * (which is the current state of HF Inference Providers as of 2026-05).
  *
  * featureExtraction can return either [seq_len, hidden_dim] (token-level)
- * or [hidden_dim] (already pooled), depending on the model's config. We
- * normalize both shapes here.
+ * or [hidden_dim] (already pooled), depending on the model's config.
  */
-export async function getEmbedding(sequence: string): Promise<number[]> {
+export async function getEmbedding(sequence: string): Promise<number[] | null> {
   const cleaned = sequence
     .replace(/\s+/g, "")
     .replace(/[^A-Z]/gi, "X")
     .toUpperCase()
-    .slice(0, 1024); // ESM-2 base context
+    .slice(0, 1024);
 
-  const out = await withRetry(
-    () =>
-      featureExtraction({
-        accessToken: requireKey(),
-        model: ESM2_MODEL,
-        inputs: cleaned,
-      }),
-    "featureExtraction",
-  );
-
-  return meanPool(out);
+  try {
+    const out = await withRetry(
+      () =>
+        featureExtraction({
+          accessToken: requireKey(),
+          model: ESM2_MODEL,
+          inputs: cleaned,
+        }),
+      "featureExtraction",
+    );
+    return meanPool(out);
+  } catch (e) {
+    // ESM-2 is not currently exposed for feature-extraction on any HF
+    // Inference Provider. Surface this once-per-process to console and
+    // return null so the caller can degrade gracefully.
+    if (!loggedEmbeddingUnavailable) {
+      loggedEmbeddingUnavailable = true;
+      console.warn(
+        "[huggingface] ESM-2 feature-extraction unavailable via Inference Providers — using MLM-only scoring.",
+        e instanceof Error ? e.message : String(e),
+      );
+    }
+    return null;
+  }
 }
+
+let loggedEmbeddingUnavailable = false;
 
 function meanPool(raw: unknown): number[] {
   // Normalize to flat number[] of length ESM2_HIDDEN_DIM

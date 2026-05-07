@@ -86,9 +86,13 @@ export async function POST(req: Request) {
         parent_sequence: v.parent_sequence,
         parent_id: parent.id,
         mutations: v.mutations as unknown as Json,
-        embedding: JSON.stringify(v.embedding) as unknown as string, // pgvector accepts string-encoded
+        // pgvector accepts a JSON-array string ("[0.1,…]"); null means we
+        // couldn't fetch an embedding (provider doesn't route ESM-2 →
+        // feature-extraction).
+        embedding: v.embedding ? (JSON.stringify(v.embedding) as unknown as string) : null,
         metadata: {
           generation_model: "facebook/esm2_t6_8M_UR50D",
+          generation_method: "esm2_fillmask_mlm",
           proposal_score: v.proposal_score,
           length: v.sequence.length,
           generated_at: new Date().toISOString(),
