@@ -10,6 +10,11 @@ import {
   RetrieveStep,
   type InitialRetrievalState,
 } from "@/components/discovery/retrieve-step";
+import {
+  GenerateStep,
+  type ParentCandidate,
+  type GeneratedVariant,
+} from "@/components/discovery/generate-step";
 import { Card } from "@/components/ui/card";
 
 interface Props {
@@ -17,7 +22,8 @@ interface Props {
   substrate: string;
   product: string;
   initialCandidates: unknown;
-  hasGenerated: boolean;
+  parents: ParentCandidate[];
+  initialVariants: GeneratedVariant[];
   hasPredictions: boolean;
 }
 
@@ -26,11 +32,10 @@ export function DiscoveryWorkflow({
   substrate,
   product,
   initialCandidates,
-  hasGenerated,
+  parents,
+  initialVariants,
   hasPredictions,
 }: Props) {
-  const [currentKey, setCurrentKey] = useState<DiscoverStep["key"]>("retrieve");
-
   const initial: InitialRetrievalState = useMemo(
     () => ({
       candidates: (initialCandidates as InitialRetrievalState["candidates"]) ?? [],
@@ -40,6 +45,11 @@ export function DiscoveryWorkflow({
   );
 
   const hasRetrieved = initial.candidates.length > 0;
+  const hasGenerated = initialVariants.length > 0;
+
+  const [currentKey, setCurrentKey] = useState<DiscoverStep["key"]>(
+    hasGenerated ? "generate" : "retrieve",
+  );
 
   const steps: DiscoverStep[] = [
     {
@@ -53,12 +63,10 @@ export function DiscoveryWorkflow({
     {
       key: "generate",
       title: "Generate variants",
-      subtitle: hasGenerated ? "Variants ready" : "ESM-2 mutation scoring",
-      status: hasGenerated
-        ? "complete"
-        : hasRetrieved
-          ? "active"
-          : "locked",
+      subtitle: hasGenerated
+        ? `${initialVariants.length} variants`
+        : "ESM-2 mutation scoring",
+      status: hasGenerated ? "complete" : hasRetrieved ? "active" : "locked",
     },
     {
       key: "predict",
@@ -91,14 +99,12 @@ export function DiscoveryWorkflow({
       )}
 
       {currentKey === "generate" && (
-        <Card className="space-y-3 p-8 text-center">
-          <Lock className="text-muted-foreground mx-auto size-6" />
-          <h3 className="text-base font-semibold">Step 2 lands in Phase 3</h3>
-          <p className="text-muted-foreground mx-auto max-w-md text-sm">
-            Variant generation uses ESM-2 masked-LM scoring against your
-            HuggingFace key. This step is wired up next.
-          </p>
-        </Card>
+        <GenerateStep
+          projectId={projectId}
+          parents={parents}
+          initialVariants={initialVariants}
+          onAdvance={() => setCurrentKey("predict")}
+        />
       )}
 
       {currentKey === "predict" && (
