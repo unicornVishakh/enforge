@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Lock } from "lucide-react";
 import {
   DiscoverStepper,
   type DiscoverStep,
@@ -15,7 +14,11 @@ import {
   type ParentCandidate,
   type GeneratedVariant,
 } from "@/components/discovery/generate-step";
-import { Card } from "@/components/ui/card";
+import {
+  PredictStep,
+  type PredictableCandidate,
+  type PredictionRow,
+} from "@/components/discovery/predict-step";
 
 interface Props {
   projectId: string;
@@ -24,7 +27,8 @@ interface Props {
   initialCandidates: unknown;
   parents: ParentCandidate[];
   initialVariants: GeneratedVariant[];
-  hasPredictions: boolean;
+  predictables: PredictableCandidate[];
+  initialPredictions: PredictionRow[];
 }
 
 export function DiscoveryWorkflow({
@@ -34,7 +38,8 @@ export function DiscoveryWorkflow({
   initialCandidates,
   parents,
   initialVariants,
-  hasPredictions,
+  predictables,
+  initialPredictions,
 }: Props) {
   const initial: InitialRetrievalState = useMemo(
     () => ({
@@ -46,9 +51,10 @@ export function DiscoveryWorkflow({
 
   const hasRetrieved = initial.candidates.length > 0;
   const hasGenerated = initialVariants.length > 0;
+  const hasPredictions = initialPredictions.length > 0;
 
   const [currentKey, setCurrentKey] = useState<DiscoverStep["key"]>(
-    hasGenerated ? "generate" : "retrieve",
+    hasPredictions ? "predict" : hasGenerated ? "generate" : "retrieve",
   );
 
   const steps: DiscoverStep[] = [
@@ -71,10 +77,12 @@ export function DiscoveryWorkflow({
     {
       key: "predict",
       title: "Predict & rank",
-      subtitle: hasPredictions ? "Scored" : "Activity, stability, yield",
+      subtitle: hasPredictions
+        ? `${initialPredictions.length} scored`
+        : "Activity, stability, yield",
       status: hasPredictions
         ? "complete"
-        : hasGenerated
+        : hasGenerated || hasRetrieved
           ? "active"
           : "locked",
     },
@@ -108,14 +116,11 @@ export function DiscoveryWorkflow({
       )}
 
       {currentKey === "predict" && (
-        <Card className="space-y-3 p-8 text-center">
-          <Lock className="text-muted-foreground mx-auto size-6" />
-          <h3 className="text-base font-semibold">Step 3 lands in Phase 4</h3>
-          <p className="text-muted-foreground mx-auto max-w-md text-sm">
-            Activity / stability / expression / yield scoring with confidence
-            intervals.
-          </p>
-        </Card>
+        <PredictStep
+          projectId={projectId}
+          candidates={predictables}
+          initialPredictions={initialPredictions}
+        />
       )}
     </div>
   );

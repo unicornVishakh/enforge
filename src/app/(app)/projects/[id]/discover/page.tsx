@@ -5,8 +5,16 @@ import type {
   Project,
   EnzymeCandidate,
   Mutation,
+  Prediction,
 } from "@/lib/types/database";
-import type { ParentCandidate, GeneratedVariant } from "@/components/discovery/generate-step";
+import type {
+  ParentCandidate,
+  GeneratedVariant,
+} from "@/components/discovery/generate-step";
+import type {
+  PredictableCandidate,
+  PredictionRow,
+} from "@/components/discovery/predict-step";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -26,18 +34,33 @@ export async function generateMetadata({ params }: PageProps) {
 export default async function DiscoverPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
-  const [{ data: project }, { data: candidates }] = await Promise.all([
-    supabase.from("projects").select("*").eq("id", id).maybeSingle(),
-    supabase
-      .from("enzyme_candidates")
-      .select("*")
-      .eq("project_id", id)
-      .order("created_at", { ascending: true }),
-  ]);
+  const [{ data: project }, { data: candidates }, { data: predictions }] =
+    await Promise.all([
+      supabase.from("projects").select("*").eq("id", id).maybeSingle(),
+      supabase
+        .from("enzyme_candidates")
+        .select("*")
+        .eq("project_id", id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("predictions")
+        .select("*")
+        .order("created_at", { ascending: false }),
+    ]);
   if (!project) notFound();
 
   const p = project as Project;
   const initial = (candidates ?? []) as EnzymeCandidate[];
+  const allPredictions = (predictions ?? []) as Prediction[];
+
+  // For each candidate, keep only the latest prediction (predictions are
+  // ordered by created_at desc; first occurrence is the latest).
+  const seen = new Set<string>();
+  const latestPredictions = allPredictions.filter((p) => {
+    if (seen.has(p.candidate_id)) return false;
+    seen.add(p.candidate_id);
+    return true;
+  });
 
   const dbCandidates = initial.filter((c) => c.source === "db");
   const generatedCandidates = initial.filter((c) => c.source === "generated");
@@ -92,6 +115,30 @@ export default async function DiscoverPage({ params }: PageProps) {
     };
   });
 
+  const predictables: PredictableCandidate[] = initial.map((c) => {
+    const parent = dbCandidates.find((d) => d.id === c.parent_id);
+    return {
+      id: c.id,
+      name: c.name,
+      source: c.source as "db" | "generated",
+      organism: c.organism,
+      ec_number: c.ec_number,
+      parent_name: parent?.name ?? null,
+      source_id: c.source_id,
+    };
+  });
+
+  const initialPredictions: PredictionRow[] = latestPredictions.map((p) => ({
+    candidate_id: p.candidate_id,
+    model_version: p.model_version,
+    activity_score: p.activity_score,
+    stability_score: p.stability_score,
+    expression_score: p.expression_score,
+    predicted_yield: p.predicted_yield,
+    confidence_lower: p.confidence_lower,
+    confidence_upper: p.confidence_upper,
+  }));
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6 md:p-8">
       <header className="space-y-2">
@@ -111,7 +158,8 @@ export default async function DiscoverPage({ params }: PageProps) {
         initialCandidates={initialCandidates}
         parents={parents}
         initialVariants={initialVariants}
-        hasPredictions={false}
+        predictables={predictables}
+        initialPredictions={initialPredictions}
       />
     </div>
   );
