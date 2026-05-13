@@ -92,8 +92,14 @@ export default async function CandidatePage({ params }: PageProps) {
   const mutations = (c.mutations as unknown as Mutation[]) ?? [];
 
   // For variants without their own PDB ID, fall back to the parent's.
-  let parentPdbId: string | null = null;
-  if (!c.pdb_id && c.parent_id) {
+  // Variants generated after the denorm carry parent_pdb_id in metadata;
+  // older variants still require a DB lookup against the parent row.
+  const meta = (c.metadata ?? {}) as {
+    parent_pdb_id?: string | null;
+    parent_pdb_ids?: string[];
+  };
+  let parentPdbId: string | null = meta.parent_pdb_id ?? null;
+  if (!c.pdb_id && !parentPdbId && c.parent_id) {
     const { data: parent } = await supabase
       .from("enzyme_candidates")
       .select("pdb_id")
@@ -102,6 +108,11 @@ export default async function CandidatePage({ params }: PageProps) {
     parentPdbId = parent?.pdb_id ?? null;
   }
   const pdbId = c.pdb_id ?? parentPdbId;
+  const pdbSource: "candidate" | "parent" | null = c.pdb_id
+    ? "candidate"
+    : parentPdbId
+      ? "parent"
+      : null;
   const highlightPositions = mutations.map((m) => m.position);
 
   return (
@@ -231,11 +242,28 @@ export default async function CandidatePage({ params }: PageProps) {
               <div>
                 <h2 className="text-sm font-semibold">3D structure</h2>
                 <p className="text-muted-foreground text-[11px]">
-                  {pdbId
-                    ? `Rendered from RCSB PDB ${pdbId.toUpperCase()}. Mutated residues marked in green.`
-                    : "No PDB structure available for this candidate."}
+                  {pdbId ? (
+                    <>
+                      Rendered from RCSB PDB{" "}
+                      <span className="font-mono">{pdbId.toUpperCase()}</span>
+                      {pdbSource === "parent" && (
+                        <>
+                          {" "}— inherited from the parent wildtype (this
+                          variant has no crystal structure of its own).
+                        </>
+                      )}
+                      {" "}Mutated residues marked.
+                    </>
+                  ) : (
+                    "No PDB structure available for this candidate."
+                  )}
                 </p>
               </div>
+              {meta.parent_pdb_ids && meta.parent_pdb_ids.length > 1 && (
+                <span className="text-muted-foreground font-mono text-[10.5px] tracking-wide">
+                  Parent has {meta.parent_pdb_ids.length} solved structures
+                </span>
+              )}
             </header>
             <ProteinViewer
               pdbId={pdbId}

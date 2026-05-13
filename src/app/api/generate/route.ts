@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   const { data: parents, error: parentErr } = await supabase
     .from("enzyme_candidates")
-    .select("id, project_id, name, sequence")
+    .select("id, project_id, name, sequence, pdb_id, metadata")
     .in("id", body.parentCandidateIds);
 
   if (parentErr || !parents || parents.length === 0) {
@@ -77,6 +77,19 @@ export async function POST(req: Request) {
       });
       if (variants.length === 0) continue;
 
+      // Denormalise the parent's PDB references onto each variant so the
+      // candidate detail page can resolve "inherited structure" with zero
+      // extra DB round-trips. Variants don't get their own pdb_id column
+      // value — they have no crystal structure — but metadata carries
+      // the parent's accessions for the viewer to fall through.
+      const parentMeta = (parent.metadata ?? {}) as { pdb_ids?: string[] };
+      const parentPdbId: string | null = parent.pdb_id ?? null;
+      const parentPdbIds: string[] = Array.isArray(parentMeta.pdb_ids)
+        ? parentMeta.pdb_ids
+        : parentPdbId
+          ? [parentPdbId]
+          : [];
+
       const inserts = variants.map((v) => ({
         project_id: body.projectId,
         source: "generated" as const,
@@ -96,6 +109,8 @@ export async function POST(req: Request) {
           proposal_score: v.proposal_score,
           length: v.sequence.length,
           generated_at: new Date().toISOString(),
+          parent_pdb_id: parentPdbId,
+          parent_pdb_ids: parentPdbIds,
         } as unknown as Json,
       }));
 

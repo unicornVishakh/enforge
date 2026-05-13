@@ -34,6 +34,8 @@ interface RetrievedEnzyme {
   sequence: string;
   length: number;
   pdb_id: string | null;
+  /** Every PDB cross-reference UniProt holds for this entry. */
+  pdb_ids: string[];
   function: string | null;
   metadata: Record<string, unknown>;
 }
@@ -222,6 +224,7 @@ export async function POST(req: Request) {
       sequence: u.sequence,
       length: u.length,
       pdb_id: u.pdb_id,
+      pdb_ids: u.pdb_ids,
       function: u.function,
       metadata: { kegg_ec_match: u.ec_number ? kegg_ecs.includes(u.ec_number) : false },
     });
@@ -255,6 +258,7 @@ export async function POST(req: Request) {
             sequence: u.sequence,
             length: u.length,
             pdb_id: u.pdb_id,
+            pdb_ids: u.pdb_ids,
             function: k?.function_short ?? u.function,
             metadata: k
               ? {
@@ -366,6 +370,7 @@ async function persistCandidates(
         retrieval_source: c.source,
         function: c.function,
         length: c.length,
+        pdb_ids: c.pdb_ids,
       },
     })),
   );

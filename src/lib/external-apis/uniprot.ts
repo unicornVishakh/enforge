@@ -83,7 +83,12 @@ export interface UniProtHit {
   sequence: string;
   length: number;
   function: string | null;
+  /** Primary PDB ID surfaced to the UI — the first cross-reference UniProt
+   *  returns (typically the canonical structure). */
   pdb_id: string | null;
+  /** Every PDB cross-reference UniProt has for this entry. Useful for the
+   *  viewer to fall through if the primary 404s on RCSB. */
+  pdb_ids: string[];
 }
 
 function parseEntry(e: z.infer<typeof UniProtEntry>): UniProtHit | null {
@@ -102,8 +107,13 @@ function parseEntry(e: z.infer<typeof UniProtEntry>): UniProtHit | null {
     e.comments?.find((c) => c.commentType === "FUNCTION")?.texts?.[0]?.value ??
     null;
 
-  const pdb =
-    e.dbCrossReferences?.find((x) => x.database === "PDB")?.id ?? null;
+  const pdbIds = Array.from(
+    new Set(
+      (e.dbCrossReferences ?? [])
+        .filter((x) => x.database === "PDB")
+        .map((x) => x.id.toUpperCase()),
+    ),
+  );
 
   return {
     accession: e.primaryAccession,
@@ -113,7 +123,8 @@ function parseEntry(e: z.infer<typeof UniProtEntry>): UniProtHit | null {
     sequence: e.sequence.value,
     length: e.sequence.length,
     function: fnComment,
-    pdb_id: pdb,
+    pdb_id: pdbIds[0] ?? null,
+    pdb_ids: pdbIds,
   };
 }
 
