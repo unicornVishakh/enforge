@@ -72,10 +72,10 @@ export function ProteinViewer({
   useEffect(() => {
     if (!pdbId) return;
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     (async () => {
+      setLoading(true);
+      setError(null);
       try {
         await ensure3Dmol();
         if (cancelled || !containerRef.current || !window.$3Dmol) return;
