@@ -154,6 +154,10 @@ function Hero() {
           <p className="text-muted-foreground/70 mt-6 text-xs">
             Free for academic research · No credit card required
           </p>
+          <p className="text-muted-foreground mt-2 text-xs italic">
+            Currently piloting with GPS Renewables — India&apos;s first
+            ethanol-to-jet plant.
+          </p>
         </div>
       </div>
     </section>

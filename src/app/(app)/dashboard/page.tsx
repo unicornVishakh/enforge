@@ -1,15 +1,20 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PilotPanel } from "./pilot-panel";
 import type { Project } from "@/lib/types/database";
 
 export const metadata = { title: "Dashboard · EnzymeForge.ai" };
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const pilotDismissed =
+    cookieStore.get("enzymeforge_pilot_panel_dismissed")?.value === "1";
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -35,6 +40,8 @@ export default async function DashboardPage() {
           Pick up where you left off, or start a new discovery run.
         </p>
       </header>
+
+      {!pilotDismissed && <PilotPanel />}
 
       <section>
         <div className="mb-4 flex items-end justify-between">

@@ -58,6 +58,11 @@ export default async function ProjectOverviewPage({ params }: PageProps) {
           Project
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">{p.name}</h1>
+        {p.name.includes("Ethanol → Jet Fuel") && (
+          <p className="text-muted-foreground text-xs italic">
+            Aligned with GPS Renewables&apos; commercial pipeline.
+          </p>
+        )}
         <div className="text-muted-foreground flex flex-wrap items-center gap-3 text-sm">
           {p.substrate && p.product && (
             <span className="font-mono">
