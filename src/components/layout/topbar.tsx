@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { Check, ChevronDown, LogOut, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/app/(auth)/actions";
 import type { Workspace } from "@/lib/types/database";
+import { cn } from "@/lib/utils";
 
 interface TopbarProps {
   email: string;
@@ -37,21 +37,33 @@ export function Topbar({
     .toUpperCase();
 
   return (
-    <header className="border-border/40 bg-background/80 sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 backdrop-blur md:px-6">
+    <header className="border-border bg-background sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 md:px-6">
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="sm" className="gap-2">
-              <span className="bg-accent inline-block size-1.5 rounded-full" />
-              <span className="max-w-[200px] truncate text-sm font-medium">
+            <button
+              type="button"
+              className={cn(
+                "group inline-flex h-8 items-center gap-2 rounded-md border border-transparent pr-2 pl-1 transition-colors",
+                "hover:border-border hover:bg-secondary/60",
+              )}
+            >
+              <span className="text-muted-foreground/70 font-mono text-[10px] tracking-[0.18em] uppercase">
+                Workspace
+              </span>
+              <span className="bg-border h-3.5 w-px" aria-hidden="true" />
+              <span className="text-foreground max-w-[220px] truncate text-sm font-medium">
                 {active?.name ?? "No workspace"}
               </span>
-              <ChevronDown className="text-muted-foreground size-3.5" />
-            </Button>
+              <ChevronDown
+                className="text-muted-foreground/60 size-3.5 transition-transform group-data-[state=open]:rotate-180"
+                aria-hidden="true"
+              />
+            </button>
           }
         />
         <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel className="text-muted-foreground text-xs uppercase">
+          <DropdownMenuLabel className="text-muted-foreground/70 font-mono text-[10px] tracking-[0.18em] uppercase">
             Workspaces
           </DropdownMenuLabel>
           {workspaces.length === 0 && (
@@ -59,16 +71,18 @@ export function Topbar({
               No workspaces yet.
             </div>
           )}
-          {workspaces.map((w) => (
-            <DropdownMenuItem key={w.id} className="flex items-center gap-2">
-              <span
-                className={`size-1.5 rounded-full ${
-                  w.id === active?.id ? "bg-accent" : "bg-muted-foreground/40"
-                }`}
-              />
-              <span className="truncate">{w.name}</span>
-            </DropdownMenuItem>
-          ))}
+          {workspaces.map((w) => {
+            const isActive = w.id === active?.id;
+            return (
+              <DropdownMenuItem
+                key={w.id}
+                className="flex items-center justify-between gap-2"
+              >
+                <span className="truncate">{w.name}</span>
+                {isActive && <Check className="text-accent size-3.5" />}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -76,18 +90,25 @@ export function Topbar({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <button
+                type="button"
+                className="hover:bg-secondary/60 inline-flex items-center gap-2 rounded-full p-0.5 pr-2 transition-colors"
+              >
                 <Avatar className="size-7">
-                  <AvatarFallback className="bg-accent/20 text-accent text-xs font-semibold">
+                  <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-semibold">
                     {initials || "U"}
                   </AvatarFallback>
                 </Avatar>
-              </Button>
+                <ChevronDown
+                  className="text-muted-foreground/60 size-3.5"
+                  aria-hidden="true"
+                />
+              </button>
             }
           />
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-60">
             <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium">
                   {fullName ?? "Researcher"}
                 </span>
@@ -100,7 +121,7 @@ export function Topbar({
             <DropdownMenuItem
               render={
                 <a href="/settings" className="flex items-center gap-2">
-                  <User className="size-4" />
+                  <User className="text-muted-foreground size-4" />
                   Profile & settings
                 </a>
               }

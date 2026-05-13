@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieBanner } from "@/components/layout/cookie-banner";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "EnzymeForge.ai — AI-driven enzyme & pathway discovery",
+  title: "EnzymeForge — computational enzyme engineering",
   description:
-    "Engineer enzymes 100x faster. AI-driven discovery for sustainable fuels and chemicals — built for synthetic biology research.",
+    "Retrieve, design, and evaluate enzymes for sustainable chemistry. Calibrated against bench data.",
 };
 
 export default function RootLayout({
@@ -28,11 +37,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-full flex flex-col antialiased">
         <TooltipProvider>{children}</TooltipProvider>
+        <CookieBanner />
         <Toaster richColors closeButton position="bottom-right" />
       </body>
     </html>

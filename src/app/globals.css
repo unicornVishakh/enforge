@@ -3,40 +3,65 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Clinical White — light-first palette, tuned for a research-lab register.
+   Background is a cool off-white; cards sit on it as pure white for
+   definition. The primary navy is borrowed from institutional research
+   communications (LBL-class). Accent stays a restrained azure, with a
+   warm-ochre "highlight" reserved for active-state markers, drop-caps,
+   and editorial accents. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.987 0.003 247);
+  --foreground: oklch(0.18 0.045 258);
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.18 0.045 258);
+
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  --popover-foreground: oklch(0.18 0.045 258);
+
+  --primary: oklch(0.24 0.07 260);
+  --primary-foreground: oklch(0.985 0.003 247);
+
+  --secondary: oklch(0.965 0.005 247);
+  --secondary-foreground: oklch(0.28 0.06 260);
+
+  --muted: oklch(0.965 0.005 247);
+  --muted-foreground: oklch(0.48 0.025 258);
+
+  --accent: oklch(0.46 0.16 264);
+  --accent-foreground: oklch(0.985 0.003 247);
+
+  /* Warm editorial highlight — used sparingly: drop-caps, byline rule. */
+  --highlight: oklch(0.68 0.13 60);
+  --highlight-foreground: oklch(0.18 0.045 258);
+
+  /* Utility bar (top strip) — deep navy like institutional sites. */
+  --utility-bar: oklch(0.16 0.05 258);
+  --utility-bar-foreground: oklch(0.88 0.015 247);
+
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.985 0.003 247);
+
+  --border: oklch(0.9 0.008 250);
+  --input: oklch(0.91 0.008 250);
+  --ring: oklch(0.46 0.16 264);
+
+  --chart-1: oklch(0.28 0.06 260);
+  --chart-2: oklch(0.48 0.16 264);
+  --chart-3: oklch(0.62 0.05 230);
+  --chart-4: oklch(0.45 0.08 30);
+  --chart-5: oklch(0.6 0.04 90);
+
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.18 0.045 258);
+  --sidebar-primary: oklch(0.24 0.07 260);
+  --sidebar-primary-foreground: oklch(0.985 0.003 247);
+  --sidebar-accent: oklch(0.965 0.005 247);
+  --sidebar-accent-foreground: oklch(0.24 0.07 260);
+  --sidebar-border: oklch(0.91 0.008 250);
+  --sidebar-ring: oklch(0.46 0.16 264);
+
+  --radius: 0.375rem;
 }
 
 .dark {
@@ -52,26 +77,30 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.235 0 0);
   --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.65 0.18 152);
+  --accent: oklch(0.62 0.18 264);
   --accent-foreground: oklch(0.145 0 0);
+  --highlight: oklch(0.78 0.14 60);
+  --highlight-foreground: oklch(0.145 0 0);
+  --utility-bar: oklch(0.1 0 0);
+  --utility-bar-foreground: oklch(0.88 0 0);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.27 0 0);
   --input: oklch(0.27 0 0);
-  --ring: oklch(0.65 0.18 152);
-  --chart-1: oklch(0.65 0.18 152);
+  --ring: oklch(0.62 0.18 264);
+  --chart-1: oklch(0.62 0.18 264);
   --chart-2: oklch(0.7 0.15 220);
   --chart-3: oklch(0.75 0.18 50);
   --chart-4: oklch(0.7 0.2 320);
   --chart-5: oklch(0.65 0.2 0);
   --sidebar: oklch(0.18 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.65 0.18 152);
+  --sidebar-primary: oklch(0.62 0.18 264);
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.235 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.27 0 0);
-  --sidebar-ring: oklch(0.65 0.18 152);
+  --sidebar-ring: oklch(0.62 0.18 264);
 }
 
 @theme inline {
@@ -89,6 +118,10 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-utility-bar: var(--utility-bar);
+  --color-utility-bar-foreground: var(--utility-bar-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -107,12 +140,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-inter-tight);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 @layer base {
@@ -120,10 +154,128 @@
     @apply border-border;
   }
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-feature-settings: "cv11" 1, "ss01" 1, "ss03" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), var(--font-inter), system-ui, sans-serif;
+    letter-spacing: -0.018em;
+  }
+}
+
+/* Long-form editorial body. Applied to <article class="research-prose">.
+   Uses the Inter family throughout for a single professional typographic
+   voice across the site — no serif fallback. Tuned for newspaper-class
+   readability: 17px body, generous leading, narrow column. */
+@layer components {
+  .research-prose {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.72;
+    color: var(--foreground);
+    font-feature-settings: "cv11" 1, "ss01" 1, "ss03" 1, "kern" 1, "liga" 1;
+  }
+  .research-prose > * + * {
+    margin-top: 1.15em;
+  }
+  .research-prose p {
+    text-wrap: pretty;
+  }
+  .research-prose h2 {
+    font-family: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-top: 2.3em;
+    margin-bottom: 0.55em;
+    color: var(--primary);
+  }
+  .research-prose h3 {
+    font-family: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.013em;
+    margin-top: 1.9em;
+    margin-bottom: 0.4em;
+  }
+  .research-prose a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .research-prose a:hover {
+    text-decoration-thickness: 2px;
+  }
+  .research-prose strong {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .research-prose em {
+    font-style: italic;
+  }
+  .research-prose code {
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 0.88em;
+    background: var(--muted);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+  .research-prose blockquote {
+    border-left: 3px solid var(--highlight);
+    padding: 0.6em 0 0.6em 1.4em;
+    margin: 2em 0;
+    font-family: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.45;
+    letter-spacing: -0.012em;
+    font-weight: 500;
+    color: var(--primary);
+  }
+  .research-prose figure {
+    margin: 2em 0;
+  }
+  .research-prose figcaption {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    margin-top: 0.6em;
+    line-height: 1.5;
+  }
+  .research-prose ul, .research-prose ol {
+    padding-left: 1.4em;
+  }
+  .research-prose ul { list-style: disc; }
+  .research-prose ol { list-style: decimal; }
+  .research-prose li + li { margin-top: 0.35em; }
+  .research-prose .lede {
+    font-family: var(--font-inter-tight), var(--font-inter), system-ui, sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    letter-spacing: -0.012em;
+    color: var(--foreground);
+    margin-bottom: 1.5em;
+    font-weight: 500;
+  }
+  .research-prose .abstract {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--foreground);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25em 0;
+    margin: 1.75em 0 2.25em;
+  }
+  .research-prose .abstract::before {
+    content: "Abstract";
+    display: block;
+    font-family: var(--font-jetbrains-mono), monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 0.5em;
   }
 }

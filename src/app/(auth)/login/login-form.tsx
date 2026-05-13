@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,8 @@ export function LoginForm() {
   const [state, action, pending] = useActionState(signInAction, initialState);
 
   return (
-    <form action={action} className="space-y-4">
-      <div className="space-y-2">
+    <form action={action} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
@@ -28,8 +29,16 @@ export function LoginForm() {
           <p className="text-destructive text-xs">{state.fieldErrors.email}</p>
         )}
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/login"
+            className="text-muted-foreground hover:text-foreground text-xs"
+          >
+            Forgot?
+          </Link>
+        </div>
         <Input
           id="password"
           name="password"
@@ -52,8 +61,12 @@ export function LoginForm() {
       )}
 
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
+        {pending ? "Signing in…" : "Sign in to the laboratory"}
       </Button>
+
+      <p className="text-muted-foreground text-center font-mono text-[10.5px] tracking-wide uppercase">
+        Free for academic research · No credit card required
+      </p>
     </form>
   );
 }

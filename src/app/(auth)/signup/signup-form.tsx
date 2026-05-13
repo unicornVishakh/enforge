@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +13,8 @@ export function SignupForm() {
   const [state, action, pending] = useActionState(signUpAction, initialState);
 
   return (
-    <form action={action} className="space-y-4">
-      <div className="space-y-2">
+    <form action={action} className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="fullName">Full name</Label>
         <Input
           id="fullName"
@@ -30,7 +31,7 @@ export function SignupForm() {
           </p>
         )}
       </div>
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
@@ -45,7 +46,7 @@ export function SignupForm() {
           <p className="text-destructive text-xs">{state.fieldErrors.email}</p>
         )}
       </div>
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="password">Password</Label>
         <Input
           id="password"
@@ -71,8 +72,19 @@ export function SignupForm() {
       )}
 
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Creating account…" : "Create account"}
+        {pending ? "Creating account…" : "Create your workspace"}
       </Button>
+
+      <p className="text-muted-foreground text-center text-[12px] leading-relaxed">
+        By creating an account you agree to the{" "}
+        <Link
+          href="/articles/methodological-disclosure"
+          className="text-foreground underline underline-offset-2 hover:no-underline"
+        >
+          methodology disclosure
+        </Link>{" "}
+        and to receive low-volume programme updates.
+      </p>
     </form>
   );
 }
