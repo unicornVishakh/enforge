@@ -78,7 +78,7 @@ const NAV: NavSection[] = [
     links: [
       { label: "Methodology", href: "/articles/methodological-disclosure" },
       { label: "Programme", href: "/articles/ethanol-to-jet-brief" },
-      { label: "Source", href: "https://github.com/unicornVishakh/enforge" },
+      { label: "Articles", href: "/articles" },
     ],
   },
 ];
@@ -86,7 +86,7 @@ const NAV: NavSection[] = [
 const UTILITY_LINKS: NavLink[] = [
   { label: "Programme", href: "/articles/ethanol-to-jet-brief" },
   { label: "Methodology", href: "/articles/methodological-disclosure" },
-  { label: "Source", href: "https://github.com/unicornVishakh/enforge" },
+  { label: "Articles", href: "/articles" },
 ];
 
 export function SiteHeader() {

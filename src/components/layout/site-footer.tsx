@@ -34,8 +34,8 @@ const COLS: Col[] = [
   {
     title: "Engage",
     links: [
-      { label: "Source repository", href: "https://github.com/unicornVishakh/enforge" },
       { label: "Contact", href: "mailto:hello@enzymeforge.lab" },
+      { label: "Programme", href: "/articles/ethanol-to-jet-brief" },
       { label: "Privacy", href: "/articles/methodological-disclosure" },
       { label: "Terms", href: "/articles/methodological-disclosure" },
     ],
