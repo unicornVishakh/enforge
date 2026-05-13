@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DiscoveryWorkflow } from "./discovery-workflow";
+import { CompareErrorToast } from "@/components/discovery/compare-error-toast";
 import type {
   Project,
   EnzymeCandidate,
@@ -141,6 +143,10 @@ export default async function DiscoverPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6 md:p-8">
+      <Suspense fallback={null}>
+        <CompareErrorToast />
+      </Suspense>
+
       <header className="space-y-2">
         <p className="text-accent font-mono text-xs tracking-[0.2em] uppercase">
           Discovery workflow

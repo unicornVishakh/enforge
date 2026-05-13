@@ -10,9 +10,10 @@ import {
   Loader2,
   Sparkles,
   Database,
+  GitCompare,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -21,6 +22,8 @@ import {
   type ScatterPoint,
 } from "@/components/visualizations/scatter-chart";
 import { cn } from "@/lib/utils";
+
+const MAX_COMPARE = 5;
 
 export interface PredictableCandidate {
   id: string;
@@ -66,6 +69,35 @@ export function PredictStep({
   const [sortKey, setSortKey] = useState<SortKey>("yield");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        return next;
+      }
+      if (next.size >= MAX_COMPARE) {
+        toast.warning(
+          `Maximum ${MAX_COMPARE} candidates per comparison — uncheck one to add another.`,
+        );
+        return prev;
+      }
+      next.add(id);
+      return next;
+    });
+  }
+
+  function clearSelected() {
+    setSelectedIds(new Set());
+  }
+
+  const selectedCount = selectedIds.size;
+  const canCompare = selectedCount >= 2 && selectedCount <= MAX_COMPARE;
+  const compareHref = `/projects/${projectId}/compare?ids=${Array.from(
+    selectedIds,
+  ).join(",")}`;
 
   function runPredict() {
     if (candidates.length === 0) {
@@ -211,14 +243,65 @@ export function PredictStep({
           <div className="border-border/40 border-b p-4">
             <h3 className="text-sm font-semibold">Ranked candidates</h3>
             <p className="text-muted-foreground text-[11px]">
-              Click a column to sort. Click a name to open the candidate detail
-              page.
+              Click a column to sort. Tick rows to compare. Candidate names
+              open in a new tab so your selection survives.
             </p>
           </div>
+
+          <div className="border-border/40 bg-muted/20 flex flex-wrap items-center justify-between gap-3 border-b px-4 py-2 text-xs">
+            <div className="flex items-center gap-3">
+              <span className="text-muted-foreground font-mono text-[11px] tracking-wide">
+                <span className="text-foreground font-semibold">
+                  {selectedCount}
+                </span>{" "}
+                selected
+              </span>
+              {selectedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={clearSelected}
+                  className="text-muted-foreground hover:text-foreground text-[11px] underline-offset-2 hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+              {selectedCount === MAX_COMPARE && (
+                <span className="text-amber-600 dark:text-amber-400 text-[11px]">
+                  Max {MAX_COMPARE} reached.
+                </span>
+              )}
+            </div>
+            {canCompare ? (
+              <Link
+                href={compareHref}
+                className={cn(buttonVariants({ size: "sm" }))}
+              >
+                <GitCompare className="size-3.5" />
+                Compare selected
+              </Link>
+            ) : (
+              <span
+                className={cn(
+                  buttonVariants({ size: "sm", variant: "outline" }),
+                  "pointer-events-none opacity-50",
+                )}
+                aria-disabled
+              >
+                <GitCompare className="size-3.5" />
+                {selectedCount < 2
+                  ? "Select 2+ to compare"
+                  : "Compare selected"}
+              </span>
+            )}
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-muted-foreground bg-muted/30 text-[11px] tracking-wider uppercase">
                 <tr>
+                  <th className="w-8 px-3 py-2">
+                    <span className="sr-only">Select</span>
+                  </th>
                   <SortHeader keyName="name" current={sortKey} dir={sortDir} onClick={toggleSort}>
                     Candidate
                   </SortHeader>
@@ -270,12 +353,27 @@ export function PredictStep({
                     onMouseLeave={() => setHighlightedId(null)}
                     className={cn(
                       "transition-colors",
-                      highlightedId === c.id ? "bg-accent/10" : "hover:bg-muted/20",
+                      selectedIds.has(c.id)
+                        ? "bg-accent/[0.06]"
+                        : highlightedId === c.id
+                          ? "bg-accent/10"
+                          : "hover:bg-muted/20",
                     )}
                   >
                     <td className="px-3 py-2.5">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(c.id)}
+                        onChange={() => toggleSelected(c.id)}
+                        aria-label={`Select ${c.name} for compare`}
+                        className="border-border accent-accent size-3.5 cursor-pointer rounded-sm border"
+                      />
+                    </td>
+                    <td className="px-3 py-2.5">
                       <Link
                         href={`/projects/${projectId}/candidates/${c.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="font-medium hover:underline"
                       >
                         {c.name}
@@ -320,6 +418,8 @@ export function PredictStep({
                     <td className="px-3 py-2.5 text-right">
                       <Link
                         href={`/projects/${projectId}/candidates/${c.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-accent transition-colors"
                       >
                         <ExternalLink className="inline-block size-3.5" />
