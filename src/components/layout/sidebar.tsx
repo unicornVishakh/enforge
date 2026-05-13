@@ -2,20 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FolderOpen,
-  FlaskConical,
-  Network,
-  Settings,
-} from "lucide-react";
+import { LayoutDashboard, FolderOpen, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderOpen },
-  { href: "/experiments", label: "Experiments", icon: FlaskConical },
-  { href: "/pathway", label: "Pathway Designer", icon: Network },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

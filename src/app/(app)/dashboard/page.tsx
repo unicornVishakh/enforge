@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, FolderPlus, FlaskConical, Network } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
@@ -35,27 +35,6 @@ export default async function DashboardPage() {
           Pick up where you left off, or start a new discovery run.
         </p>
       </header>
-
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <QuickAction
-          href="/projects/new"
-          icon={FolderPlus}
-          title="New project"
-          subtitle="Define a target reaction and start retrieving"
-        />
-        <QuickAction
-          href="/experiments"
-          icon={FlaskConical}
-          title="Log an experiment"
-          subtitle="Close the loop with a measured outcome"
-        />
-        <QuickAction
-          href="/pathway"
-          icon={Network}
-          title="Design a pathway"
-          subtitle="Connect substrate → product through enzymes"
-        />
-      </section>
 
       <section>
         <div className="mb-4 flex items-end justify-between">
@@ -114,30 +93,3 @@ export default async function DashboardPage() {
   );
 }
 
-function QuickAction({
-  href,
-  icon: Icon,
-  title,
-  subtitle,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group hover:border-accent/40 hover:bg-card border-border/60 bg-card/40 flex items-start gap-3 rounded-xl border p-4 transition-colors"
-    >
-      <div className="bg-accent/10 text-accent flex size-9 items-center justify-center rounded-lg">
-        <Icon className="size-4" />
-      </div>
-      <div className="flex-1">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        <p className="text-muted-foreground text-xs">{subtitle}</p>
-      </div>
-      <ArrowRight className="text-muted-foreground/50 group-hover:text-accent size-4 transition-colors" />
-    </Link>
-  );
-}
