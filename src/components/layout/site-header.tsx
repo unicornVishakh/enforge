@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, ChevronDown, Menu, Search, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { buttonVariants } from "@/components/ui/button";
+import { SearchDialog } from "@/components/layout/search-dialog";
 import { cn } from "@/lib/utils";
 
 type NavLink = { label: string; href: string; description?: string };
@@ -92,6 +93,22 @@ const UTILITY_LINKS: NavLink[] = [
 export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Cmd/Ctrl+K opens the search overlay site-wide
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      } else if (e.key === "/" && !isTypingTarget(e.target)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-background">
@@ -195,7 +212,8 @@ export function SiteHeader() {
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
-              aria-label="Search"
+              aria-label="Search articles"
+              onClick={() => setSearchOpen(true)}
               className="hover:bg-muted text-foreground/80 hidden size-9 items-center justify-center rounded-md transition-colors md:inline-flex"
             >
               <Search className="size-[18px]" />
@@ -274,6 +292,18 @@ export function SiteHeader() {
           </div>
         )}
       </div>
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
+  );
+}
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return (
+    tag === "INPUT" ||
+    tag === "TEXTAREA" ||
+    tag === "SELECT" ||
+    target.isContentEditable
   );
 }

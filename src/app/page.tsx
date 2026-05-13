@@ -254,24 +254,114 @@ function ArticleCard({ article }: { article: Article }) {
       href={`/articles/${article.slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group border-border/80 bg-card hover:border-accent/40 flex flex-col rounded-lg border p-6 transition-colors"
+      className="group border-border/80 bg-card hover:border-accent/40 flex flex-col overflow-hidden rounded-lg border transition-colors"
     >
-      <div className="text-muted-foreground flex items-center gap-2 font-mono text-[10.5px] tracking-[0.18em] uppercase">
-        <span className="bg-highlight inline-block h-[2px] w-5" />
-        {CATEGORY_LABELS[article.category]}
-      </div>
-      <h3 className="font-display text-foreground group-hover:text-accent mt-3 text-[1.15rem] font-semibold leading-snug tracking-[-0.015em] transition-colors">
-        {article.title}
-      </h3>
-      <p className="text-muted-foreground mt-2 line-clamp-3 text-[14px] leading-relaxed">
-        {article.subtitle.replace(/<[^>]+>/g, "")}
-      </p>
-      <div className="text-muted-foreground/80 mt-5 flex items-center gap-2 font-mono text-[10.5px] tracking-wide">
-        <span>{article.publishedLabel}</span>
-        <span aria-hidden>·</span>
-        <span>{article.readingMinutes} MIN</span>
+      <CardFigure article={article} />
+      <div className="flex flex-1 flex-col p-6">
+        <div className="text-muted-foreground flex items-center gap-2 font-mono text-[10.5px] tracking-[0.18em] uppercase">
+          <span className="bg-highlight inline-block h-[2px] w-5" />
+          {CATEGORY_LABELS[article.category]}
+        </div>
+        <h3 className="font-display text-foreground group-hover:text-accent mt-3 text-[1.15rem] font-semibold leading-snug tracking-[-0.015em] transition-colors">
+          {article.title}
+        </h3>
+        <p className="text-muted-foreground mt-2 line-clamp-3 text-[14px] leading-relaxed">
+          {article.subtitle.replace(/<[^>]+>/g, "")}
+        </p>
+        <div className="text-muted-foreground/80 mt-auto flex items-center gap-2 pt-5 font-mono text-[10.5px] tracking-wide">
+          <span>{article.publishedLabel}</span>
+          <span aria-hidden>·</span>
+          <span>{article.readingMinutes} MIN</span>
+        </div>
       </div>
     </Link>
+  );
+}
+
+const CARD_FIGURE_PALETTE: Record<
+  Article["category"],
+  { fg: string; bg: string; tint: string }
+> = {
+  methods: {
+    fg: "oklch(0.34 0.1 264)",
+    bg: "oklch(0.97 0.014 247)",
+    tint: "oklch(0.46 0.16 264 / 0.12)",
+  },
+  programme: {
+    fg: "oklch(0.42 0.11 60)",
+    bg: "oklch(0.97 0.014 80)",
+    tint: "oklch(0.55 0.13 60 / 0.12)",
+  },
+  perspective: {
+    fg: "oklch(0.34 0.08 280)",
+    bg: "oklch(0.97 0.012 290)",
+    tint: "oklch(0.5 0.12 280 / 0.12)",
+  },
+  disclosure: {
+    fg: "oklch(0.32 0.05 220)",
+    bg: "oklch(0.96 0.008 220)",
+    tint: "oklch(0.46 0.06 220 / 0.12)",
+  },
+};
+
+function CardFigure({ article }: { article: Article }) {
+  const c = CARD_FIGURE_PALETTE[article.category];
+  const seed = Array.from(article.slug).reduce(
+    (a, ch) => a + ch.charCodeAt(0),
+    0,
+  );
+  const nodes = Array.from({ length: 16 }, (_, i) => {
+    const x = (((seed + 7) * (i + 3)) % 94) + 3;
+    const y = (((seed >> 1) + 11) * (i + 1)) % 56 + 6;
+    const r = 1.0 + ((seed + i) % 5) * 0.35;
+    return { x, y, r };
+  });
+  return (
+    <div
+      className="border-border/70 relative aspect-[16/8] w-full overflow-hidden border-b"
+      style={{ background: c.bg }}
+      aria-hidden
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `linear-gradient(180deg, transparent 0%, ${c.tint} 100%)`,
+        }}
+      />
+      <svg
+        viewBox="0 0 100 60"
+        preserveAspectRatio="xMidYMid slice"
+        className="absolute inset-0 size-full"
+      >
+        {nodes.map((n, i) =>
+          nodes.slice(i + 1).map((m, j) => {
+            const d = Math.hypot(n.x - m.x, n.y - m.y);
+            if (d > 20) return null;
+            return (
+              <line
+                key={`${i}-${j}`}
+                x1={n.x}
+                y1={n.y}
+                x2={m.x}
+                y2={m.y}
+                stroke={c.fg}
+                strokeOpacity={0.22}
+                strokeWidth={0.16}
+              />
+            );
+          }),
+        )}
+        {nodes.map((n, i) => (
+          <circle key={i} cx={n.x} cy={n.y} r={n.r} fill={c.fg} opacity={0.82} />
+        ))}
+      </svg>
+      <span
+        className="bg-card/85 absolute bottom-2 left-3 rounded-sm px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.16em] uppercase backdrop-blur"
+        style={{ color: c.fg }}
+      >
+        Fig · {article.slug.split("-").slice(0, 2).join(" · ")}
+      </span>
+    </div>
   );
 }
 
