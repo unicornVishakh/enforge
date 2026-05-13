@@ -127,28 +127,31 @@ export function SiteHeader() {
 
       {/* Main nav */}
       <div className="border-border/80 border-b bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-6">
-          <Link
-            href="/"
-            className="flex shrink-0 items-center"
-            aria-label="EnzymeForge — home"
-          >
-            <Logo />
-          </Link>
+        <div className="mx-auto grid h-20 max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-8 px-6">
+          {/* Left — logo */}
+          <div className="flex items-center">
+            <Link
+              href="/"
+              className="flex shrink-0 items-center"
+              aria-label="EnzymeForge — home"
+            >
+              <Logo />
+            </Link>
+          </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden flex-1 items-center gap-1 lg:flex">
+          {/* Center — desktop nav */}
+          <nav className="hidden items-center justify-center gap-1 lg:flex">
             {NAV.map((section) => (
               <div
                 key={section.title}
-                className="relative"
+                className="relative flex"
                 onMouseEnter={() => setOpenSection(section.title)}
                 onMouseLeave={() => setOpenSection(null)}
               >
                 <Link
                   href={section.href}
                   className={cn(
-                    "text-foreground/85 hover:text-foreground inline-flex items-center gap-1 rounded px-3 py-5 text-[14px] font-medium transition-colors",
+                    "text-foreground/85 hover:text-foreground inline-flex items-center gap-1 rounded px-3.5 py-7 text-[14px] font-medium transition-colors",
                     openSection === section.title && "text-foreground",
                   )}
                 >
@@ -161,7 +164,7 @@ export function SiteHeader() {
                   />
                 </Link>
                 {openSection === section.title && (
-                  <div className="border-border/80 bg-card absolute top-full left-0 z-40 w-80 rounded-md border shadow-lg">
+                  <div className="border-border/80 bg-card absolute top-full left-1/2 z-40 w-80 -translate-x-1/2 rounded-md border shadow-lg">
                     <div className="bg-highlight/60 h-0.5 w-12" />
                     <ul className="p-2">
                       {section.links.map((l) => (
@@ -188,7 +191,8 @@ export function SiteHeader() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          {/* Right — actions */}
+          <div className="flex items-center justify-end gap-2">
             <button
               type="button"
               aria-label="Search"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, LogOut, User } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +37,7 @@ export function Topbar({
     .toUpperCase();
 
   return (
-    <header className="border-border bg-background sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b px-4 md:px-6">
+    <header className="border-border bg-background sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b px-4 md:px-6">
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -120,9 +120,8 @@ export function Topbar({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               render={
-                <a href="/settings" className="flex items-center gap-2">
-                  <User className="text-muted-foreground size-4" />
-                  Profile & settings
+                <a href="/settings" className="block">
+                  Profile &amp; settings
                 </a>
               }
             />
@@ -132,9 +131,8 @@ export function Topbar({
                 render={
                   <button
                     type="submit"
-                    className="text-destructive flex w-full items-center gap-2"
+                    className="text-destructive w-full text-left"
                   >
-                    <LogOut className="size-4" />
                     Sign out
                   </button>
                 }
